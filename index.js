@@ -299,6 +299,8 @@ module.exports = function EasyFishing(mod) {
 	});
 
 	mod.hook('S_END_PRODUCE', 1, event => {
+		if (!mod.settings.enabled) return;
+
 		if (crafting) {
 			if (event.success) {
 				if (debug) console.log("S_END_PRODUCE - done");
@@ -344,6 +346,8 @@ module.exports = function EasyFishing(mod) {
 	});
 
 	mod.hook('S_REQUEST_CONTRACT', 1, event => {
+		if (!mod.settings.enabled) return;
+
 		if (dismantling || selling) {
 			if (event.type == 89) {
 				if (debug) console.log("S_REQUEST_CONTRACT - done");
@@ -446,7 +450,6 @@ module.exports = function EasyFishing(mod) {
 	});
 
 	mod.hook('S_INVEN', 18, event => {
-
 		if (lastBait) {
 			invenItems = event.first ? event.items : invenItems.concat(event.items);
 		}
