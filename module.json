@@ -1,8 +1,16 @@
 {
     "disableAutoUpdate": false,
-    "name": "easy-fishing",
-    "author": "KTC",
-    "description": "Makes so that every fish has the same difficulty to catch as a Grade 1 fish.",
-    "version": "1.0",
-    "servers": ["https://raw.githubusercontent.com/terastuff/easy-fishing/master/"]
+    "name": "Easy-Fishing",
+    "options": {
+        "niceName": "快速钓鱼",
+        "guiName": "快速钓鱼",
+        "settingsVersion": 4,
+        "settingsFile": "config.json",
+        "settingsMigrator": "settings_migrator.js"
+    },
+    "author": "ZC",
+    "description": "自动 钓鱼/出售/合成/分解/丢弃/沙拉/延迟/钓距/游戏难度最低(快速钓鱼)",
+    "servers": ["https://raw.githubusercontent.com/zc149352394/Easy-Fishing/master/"],
+    "supportUrl": "https://github.com/zc149352394/Easy-Fishing/issues",
+    "version": "ch_4.0"
 }

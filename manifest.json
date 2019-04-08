@@ -1,9 +1,39 @@
 {
-	"files": {
-		"index.js": "c6917d242cb66a2aac2a23dca7ff74deb37d873455c0021c2060f62505cde256",
-		"module.json": "90a062489afeb7dc87d003664c9ecdccc6137d1d7ef8913188746a757fcd8431",
-		"protocol.341697.map": "5422ef05302602e014bf5ce38f1d82a863befb70760aedf05844c12c69129289",
-		"protocol.341698.map": "0bc0621e2f3de7172941c1c8d64fb1424ad18b95ca0617d688c30def0fd4d571",
-		"protocol.341702.map": "600964833e384d4117b110a4f2d8bc84d8dd93208457deab2a4230ee91fb2871"
-	}
+    "files": {
+        "README.md": "b81624548a720e18acb8d7527d3bffaee5dd4de719d3cef0654df59d1ce47bf4",
+        "index.js": "fe1398177a6a0c39dcea026862a9d3c4daf564cd2e61222c212dab50226f9a1b",
+        "module.json": "8670706d6b762622329be2a561abd051306dbd69d6f3ae134856592036549a2d",
+        "settings_migrator.js": "7b34e546126755e35c1e653d13fca8a1ee99b39bb1b232cfc09ff291b5fc1cab"
+    },
+    "defs": {
+        "C_CANCEL_CONTRACT": 1,
+        "C_CAST_FISHING_ROD": "raw",
+        "C_CHAT": 1,
+        "C_DEL_ITEM": 2,
+        "C_DIALOG": 1,
+        "C_END_FISHING_MINIGAME": 1,
+        "C_NPC_CONTACT": 2,
+        "C_PLAYER_LOCATION": 5,
+        "C_REQUEST_CONTRACT": 1,
+        "C_RQ_ADD_ITEM_TO_DECOMPOSITION_CONTRACT": 1,
+        "C_RQ_START_SOCIAL_ON_PROGRESS_DECOMPOSITION": 1,
+        "C_SHOW_INVEN": 1,
+        "C_START_FISHING_MINIGAME": 1,
+        "C_START_PRODUCE": 1,
+        "C_STORE_COMMIT": 1,
+        "C_STORE_SELL_ADD_BASKET": 1,
+        "C_USE_ITEM": 3,
+        "S_ABNORMALITY_BEGIN": 3,
+        "S_ABNORMALITY_END": 1,
+        "S_CAST_FISHING_ROD": "raw",
+        "S_CHAT": 2,
+        "S_DIALOG": 2,
+        "S_END_PRODUCE": 1,
+        "S_FISHING_BITE": "raw",
+        "S_INVEN": 18,
+        "S_LOGIN": 12,
+        "S_REQUEST_CONTRACT": 1,
+        "S_START_FISHING_MINIGAME": "raw",
+        "S_SYSTEM_MESSAGE": 1
+    }
 }
