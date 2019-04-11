@@ -1,9 +1,9 @@
 {
     "files": {
-        "README.md": "b81624548a720e18acb8d7527d3bffaee5dd4de719d3cef0654df59d1ce47bf4",
-        "index.js": "80fd47af2b016f03eb7a3737343942864bbfa552a4d4f7e30b733dfe5e815592",
-        "module.json": "8670706d6b762622329be2a561abd051306dbd69d6f3ae134856592036549a2d",
-        "settings_migrator.js": "7b34e546126755e35c1e653d13fca8a1ee99b39bb1b232cfc09ff291b5fc1cab"
+        "README.md": "a0334aecd098a6c20821b5aede73e2adbfbc75988edd06282c441c231f906da9",
+        "index.js": "8bbbe9a5af32478aaf96748c97417fb66741a90cb2514b5fc3fdb9b24eb099d4",
+        "module.json": "daa1c761471df423129bee5cda263d874ac3a2d62071e5203b7a4fdba87fcb98",
+        "settings_migrator.js": "89d27edaef08dbfe6eefe6bccca3d430be483bfd8b08f6427d18510a71ceb49d"
     },
     "defs": {
         "C_CANCEL_CONTRACT": 1,
@@ -31,7 +31,6 @@
         "S_END_PRODUCE": 1,
         "S_FISHING_BITE": "raw",
         "S_INVEN": 18,
-        "S_LOGIN": 12,
         "S_REQUEST_CONTRACT": 1,
         "S_START_FISHING_MINIGAME": "raw",
         "S_SYSTEM_MESSAGE": 1

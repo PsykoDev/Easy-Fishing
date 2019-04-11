@@ -1,77 +1,77 @@
 const DefaultSettings = {
-    "enabled": false,				// 模组开关
-    "autoCrafting": true,			// 合成鱼饵
-    "autoDismantling": true,		// 分解鱼肉
-    "autoSelling": true,			// 出售 鱼
-    "discardFilets": true,			// 丢弃 鱼
-    "discardCount": 500,			// 丢弃数量
-    "reUseFishSalad": true,			// 食用沙拉
-    "useRandomDelay": true,			// 拉钩延迟
-    "catchDelay": [2000, 8000],		// 最低 最高 毫秒(ms)
-    "moveItemDelay": [200, 500],	// 添加 鱼 的延迟
-    "castDistance": 3,				// 抛竿距离 0 ~ 18
+    "enabled": false,
+    "autoCrafting": true,           // 合成鱼饵
+    "autoDismantling": true,        // 分解鱼肉
+    "autoSelling": true,            // 出售 鱼
+    "discardFilets": true,          // 丢弃 鱼
+    "discardCount": 500,            // 丢弃数量
+    "reUseFishSalad": true,         // 食用沙拉
+    "useRandomDelay": true,         // 拉钩延迟
+    "catchDelay": [2000, 8000],     // 最低 最高 毫秒(ms)
+    "moveItemDelay": [200, 500],    // 添加 鱼 的延迟
+    "castDistance": 3,              // 抛竿距离 0 ~ 18
 
-    "autoDismantleFishes": [
-        206400, "[0等级]罗汉鱼",		// Stone Moroko
-        206401, "[0等級]蓝颊鲫鱼",		// Azurecheek Carp
+    "autoDismantleFishes": [ // 自动分解的鱼类
+        206400, // [0等级]罗汉鱼
+        206401, // [0等級]蓝颊鲫鱼
 
-        206402, "[1等级]鳌虾",			// Crayfish
-        206403, "[1等级]小丑鱼",		// Clownfish
+        206402, // [1等级]鳌虾
+        206403, // [1等级]小丑鱼
 
-        206404, "[2等级]神仙鱼",		// Angelfish
-        206405, "[2等级]黑色小丑鱼",	// Black-fin Clownfish
+        206404, // [2等级]神仙鱼
+        206405, // [2等级]黑色小丑鱼
 
-        206406, "[3等级]鱿鱼",			// Squid
-        206407, "[3等级]鲫鱼",			// Crucian Carp
+        206406, // [3等级]鱿鱼
+        206407, // [3等级]鲫鱼
 
-        206408, "[4等级]海鳗",			// Sea Eel
-        206409, "[4等级]拟刺尾鲷",		// Tang Fish
-        206410, "[4等级]河鳗",			// Freshwater Eel
+        206408, // [4等级]海鳗
+        206409, // [4等级]拟刺尾鲷
+        206410, // [4等级]河鳗
 
-        206411, "[5等级]章鱼",			// Octopus
-        206412, "[5等级]四鳍旗鱼",		// Marlin
-        206413, "[5等级]鲑鱼",			// Prince Salmon
+        206411, // [5等级]章鱼
+        206412, // [5等级]四鳍旗鱼
+        206413, // [5等级]鲑鱼
 
-        206414, "[6等级]魟鱼",			// Mottled Ray
-        206415, "[6等级]花鲶",			// Catfish
-        206416, "[6等级]平口油鲶",		// Channel Catfish
-        206417, "[6等级]鲤鱼",			// Eldritch Carp
+        206414, // [6等级]魟鱼
+        206415, // [6等级]花鲶
+        206416, // [6等级]平口油鲶
+        206417, // [6等级]鲤鱼
 
-        206418, "[7等级]食人鲨",		// Gula Shark
-        206419, "[7等级]银鲑",			// Chroma Salmon
-        206420, "[7等级]电鳗",			// Electric Eel
-        206421, "[7等级]黄鳍鲔",		// Yellowfin
+        206418, // [7等级]食人鲨
+        206419, // [7等级]银鲑
+        206420, // [7等级]电鳗
+        206421, // [7等级]黄鳍鲔
 
-        206422, "[8等级]黑点刺魟",		// Dipturus
-        206423, "[8等级]石章鱼",		// Stone Octopus
-        206424, "[8等级]血红赤枪鱼",	// Crimson Marlin
-        206425, "[8等级]彩虹鲤",		// Prism Carp
+        206422, // [8等级]黑点刺魟
+        206423, // [8等级]石章鱼
+        206424, // [8等级]血红赤枪鱼
+        206425, // [8等级]彩虹鲤
 
-        206426, "[9等级]太平洋黑鲔",	// Bluefin
-        206427, "[9等级]金色螯虾",		// Golden Crayfish
-        206428, "[9等级]赤红鱿鱼",		// Crimson Squid
-        206429, "[9等级]古代藓苔鲑鱼",	// Mossback
-        206430, "[9等级]黄金鳗",		// Golden Eel
+        206426, // [9等级]太平洋黑鲔
+        206427, // [9等级]金色螯虾
+        206428, // [9等级]赤红鱿鱼
+        206429, // [9等级]古代藓苔鲑鱼
+        206430, // [9等级]黄金鳗
 
-        206431, "[10等级]红鲨",			// Crimson Shark
-        206432, "[10等级]巴鲣",			// Specklefin
-        206433, "[10等级]翡翠蓝枪鱼",	// Makaira
-        206434, "[10等级]悲鸣鲨鱼",		// Gluda Shark
-        206435, "[10等级]血红鳗",		// Shrieking Eel
+        206431, // [10等级]红鲨	
+        206432, // [10等级]巴鲣	
+        206433, // [10等级]翡翠蓝枪鱼
+        206434, // [10等级]悲鸣鲨鱼
+        206435, // [10等级]血红鳗
 
-        206500, "[大物]巨鯰(主线)",		// Giant Blue
-        206501, "[大物]黃金鯊(主线)",	// Golden Shark
-        206502, "[大物]神仙烏鳢(主线)",	// Fairy Snakehead
-        206503, "[大物]黄金雨伞旗鱼",	// Golden Sailfish
-        206504, "[大物]女王鮭(主线)",	// Queen Salmon
-        206505, "[大物]黃金章魚(主线)",	// Golden Octopus
-        206506, "[大物]巨型螯虾",		// Giant Blue
-        206507, "[大物]黄金魟鱼",		// Golden Ray
-        206508, "[大物]黑尾鳍鲔",		// Darkfin
-        206509, "[大物]黄金鲫鱼"		// Golden Carp
+        206500, // [大物]巨鯰(主线)
+        206501, // [大物]黃金鯊(主线)
+        206502, // [大物]神仙烏鳢(主线)
+        206503, // [大物]黄金雨伞旗鱼
+        206504, // [大物]女王鮭(主线)
+        206505, // [大物]黃金章魚(主线)
+        206506, // [大物]巨型螯虾
+        206507, // [大物]黄金魟鱼
+        206508, // [大物]黑尾鳍鲔
+        206509  // [大物]黄金鲫鱼
     ],
 
-    "autoSellFishes": [
+    "autoSellFishes": [ // 自动出售的鱼类
         206400, // Stone Moroko
         206401, // Azurecheek Carp
         206402, // Crayfish
@@ -117,7 +117,7 @@ const DefaultSettings = {
         206506, // Giant Blue
         206507, // Golden Ray
         206508, // Darkfin
-        206509, // Golden Carp
+        206509 // Golden Carp
     ]
 };
 
@@ -139,8 +139,7 @@ module.exports = function MigrateSettings(from_ver, to_ver, settings) {
         // If we reach this point it's guaranteed that from_ver === to_ver - 1, so we can implement
         // a switch for each version step that upgrades to the next version. This enables us to
         // upgrade from any version to the latest version without additional effort!
-        switch(to_ver)
-        {
+        switch(to_ver) {
             default:
                 let oldsettings = settings
                 

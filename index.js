@@ -32,15 +32,14 @@ module.exports = function EasyFishing(mod) {
 		const options = require('./module').options
 		if (options) {
 			const settingsVersion = options.settingsVersion
-			if(settingsVersion) {
-				mod.settings = require('./' + (options.settingsMigrator || 'module_settings_migrator.js'))(mod.settings._version, settingsVersion, mod.settings)
+			if (settingsVersion) {
+				mod.settings = require('./' + (options.settingsMigrator || 'settings_migrator.js'))(mod.settings._version, settingsVersion, mod.settings)
 				mod.settings._version = settingsVersion
 			}
 		}
 	}
 
-	let gameId = 0n,
-		currentBait = null,
+	let currentBait = null,
 		lastBait = null,
 		playerLocation = {x: 0, y: 0, z: 0},
 		playerAngle = 0,
@@ -108,7 +107,7 @@ module.exports = function EasyFishing(mod) {
 		)
 	}
 
-	command.add('钓鱼', (arg, value) => {
+	mod.command.add('钓鱼', (arg, value) => {
 		if (!arg) {
 			mod.settings.enabled = !mod.settings.enabled;
 			command.message(`模组: ${mod.settings.enabled ? "已开启" : "已关闭"}`);
@@ -185,7 +184,7 @@ module.exports = function EasyFishing(mod) {
 	function startFishing() {
 		if (debug) console.log("startFishing() - fishingRod " + fishingRod);
 		mod.toServer('C_USE_ITEM', 3, {
-			gameId,
+			gameId: mod.game.me.gameId,
 			id: fishingRod,
 			dbid: 0,
 			target: 0,
@@ -319,7 +318,7 @@ module.exports = function EasyFishing(mod) {
 					}
 				} else {
 					mod.toServer('C_USE_ITEM', 3, {
-						gameId,
+						gameId: mod.game.me.gameId,
 						id: lastBait.itemId,
 						dbid: 0,
 						target: 0,
@@ -418,7 +417,7 @@ module.exports = function EasyFishing(mod) {
 					for (let item of itemsToProcess.slice(0, 8)) {
 						mod.setTimeout(() => {
 							mod.toServer('C_STORE_SELL_ADD_BASKET', 1, {
-								cid: gameId,
+								cid: mod.game.me.gameId,
 								npc: event.id,
 								item: item.id,
 								quantity: 1,
@@ -430,7 +429,7 @@ module.exports = function EasyFishing(mod) {
 					itemsToProcess = itemsToProcess.slice(8);
 					mod.setTimeout(() => {
 						mod.toServer('C_STORE_COMMIT', 1, {
-							gameId,
+							gameId: mod.game.me.gameId,
 							contract: event.id
 						});
 					}, delay);
@@ -478,7 +477,7 @@ module.exports = function EasyFishing(mod) {
 				if (item.id == 204052) {
 					discarding = false;
 					mod.send('C_DEL_ITEM', 2, {
-						gameId,
+						gameId: mod.game.me.gameId,
 						slot: item.slot - 40,
 						amount: Math.min(item.amount, mod.settings.discardCount)
 					});
@@ -495,16 +494,12 @@ module.exports = function EasyFishing(mod) {
 		}
 	});
 
-	mod.hook('S_LOGIN', 12, event => {
-		({gameId} = event);
-	});
-
 	mod.hook('S_FISHING_BITE', 'raw', (code, data) => {
 		if (!mod.settings.enabled) return;
 
 		const stream = new Readable(data);
 		stream.position = 8;
-		if (stream.uint64() === gameId) {
+		if (stream.uint64() === mod.game.me.gameId) {
 			mod.toServer('C_START_FISHING_MINIGAME', 1, {
 				
 			});
@@ -524,7 +519,7 @@ module.exports = function EasyFishing(mod) {
 
 		const stream = new Readable(data);
 		stream.position = 4;
-		if (stream.uint64() === gameId) {
+		if (stream.uint64() === mod.game.me.gameId) {
 			stream.position = 25;
 			fishingRod = stream.uint32();
 		}
@@ -536,7 +531,7 @@ module.exports = function EasyFishing(mod) {
 		if (debug) console.log("S_START_FISHING_MINIGAME - done");
 		const stream = new Readable(data);
 		stream.position = 8;
-		if (stream.uint64() === gameId) {
+		if (stream.uint64() === mod.game.me.gameId) {
 			mod.setTimeout(() => {
 				mod.toServer('C_END_FISHING_MINIGAME', 1, {
 					success: true
@@ -550,7 +545,7 @@ module.exports = function EasyFishing(mod) {
 		if (RODS.includes(event.id)) {
 			if (useSalad) {
 				mod.toServer('C_USE_ITEM', 3, {
-					gameId,
+					gameId: mod.game.me.gameId,
 					id: 206020,
 					dbid: 0,
 					target: 0,
@@ -589,7 +584,7 @@ module.exports = function EasyFishing(mod) {
 	mod.hook('S_ABNORMALITY_BEGIN', 3, event => {
 		if (!mod.settings.enabled) return;
 
-		if (event.target === gameId) {
+		if (event.target === mod.game.me.gameId) {
 			currentBait = CRAFTABLE_BAITS.find(obj => obj.abnormalityId === event.id) || currentBait;
 			lastBait = currentBait || lastBait;
 		}
@@ -598,7 +593,7 @@ module.exports = function EasyFishing(mod) {
 	mod.hook('S_ABNORMALITY_END', 1, event => {
 		if (!mod.settings.enabled) return;
 
-		if (event.target !== gameId) return;
+		if (event.target !== mod.game.me.gameId) return;
 
 		if (currentBait && currentBait.abnormalityId === event.id) {
 			currentBait = null;
@@ -626,7 +621,7 @@ module.exports = function EasyFishing(mod) {
 		if (msg) {
 			if (mod.settings.autoCrafting && lastBait && msg.id === 'SMT_CANNOT_FISHING_NON_BAIT') {
 				mod.toServer('C_USE_ITEM', 3, {
-					gameId,
+					gameId: mod.game.me.gameId,
 					id: lastBait.itemId,
 					dbid: 0,
 					target: 0,
