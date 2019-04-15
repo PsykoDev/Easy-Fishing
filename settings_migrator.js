@@ -108,6 +108,7 @@ const DefaultSettings = {
         206433, // Makaira
         206434, // Gluda Shark
         206435, // Shrieking Eel
+
         206500, // Giant Blue
         206501, // Golden Shark
         206502, // Fairy Snakehead
@@ -117,7 +118,7 @@ const DefaultSettings = {
         206506, // Giant Blue
         206507, // Golden Ray
         206508, // Darkfin
-        206509 // Golden Carp
+        206509  // Golden Carp
     ]
 };
 

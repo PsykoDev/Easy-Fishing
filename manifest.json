@@ -1,14 +1,13 @@
 {
     "files": {
         "README.md": "a0334aecd098a6c20821b5aede73e2adbfbc75988edd06282c441c231f906da9",
-        "index.js": "8bbbe9a5af32478aaf96748c97417fb66741a90cb2514b5fc3fdb9b24eb099d4",
+        "index.js": "4607a15e463c9e707218521bf85c287ce6554d61cdd411865ccb2d35bbdc2cb5",
         "module.json": "daa1c761471df423129bee5cda263d874ac3a2d62071e5203b7a4fdba87fcb98",
-        "settings_migrator.js": "89d27edaef08dbfe6eefe6bccca3d430be483bfd8b08f6427d18510a71ceb49d"
+        "settings_migrator.js": "ad4b2059df9c0f63165fe2945be3a8df207ed29fb67ff1c5b202cea67f78f740"
     },
     "defs": {
         "C_CANCEL_CONTRACT": 1,
         "C_CAST_FISHING_ROD": "raw",
-        "C_CHAT": 1,
         "C_DEL_ITEM": 2,
         "C_DIALOG": 1,
         "C_END_FISHING_MINIGAME": 1,
