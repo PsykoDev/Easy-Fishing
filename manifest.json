@@ -1,9 +1,9 @@
 {
     "files": {
         "README.md": "a0334aecd098a6c20821b5aede73e2adbfbc75988edd06282c441c231f906da9",
-        "index.js": "4607a15e463c9e707218521bf85c287ce6554d61cdd411865ccb2d35bbdc2cb5",
+        "index.js": "772b4e5870fb5e82b4b21ec11c0c21d2b13852a7607bf2ca863657288db71f1a",
         "module.json": "daa1c761471df423129bee5cda263d874ac3a2d62071e5203b7a4fdba87fcb98",
-        "settings_migrator.js": "ad4b2059df9c0f63165fe2945be3a8df207ed29fb67ff1c5b202cea67f78f740"
+        "settings_migrator.js": "55d175e0e684f10a2c27861492974aa135980a2ce60d518efca4ea16e40a96e0"
     },
     "defs": {
         "C_CANCEL_CONTRACT": 1,

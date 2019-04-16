@@ -102,9 +102,10 @@ module.exports = function EasyFishing(mod) {
 		send(
 			` --- 钓鱼模组 各功能状态 ---`,
 			`自动合成: ${mod.settings.autoCrafting ? "启用" : "禁用"}`,
+			`保留大物: ${mod.settings.filterGolden ? "启用" : "禁用"}`,
 			`自动出售: ${mod.settings.autoSelling ? "启用" : "禁用"}`,
 			`自动分解: ${mod.settings.autoDismantling ? "启用" : "禁用"}`,
-			`自动丢弃: ${mod.settings.discardFilets ? "启用" : "禁用"}, 数量: ${mod.settings.discardCount}`,
+			`鱼肉丢弃: ${mod.settings.discardFilets ? "启用" : "禁用"}, 数量: ${mod.settings.discardCount}`,
 			`自动沙拉: ${mod.settings.reUseFishSalad ? "启用" : "禁用"}`,
 			`随机延迟: ${mod.settings.useRandomDelay ? "启用" : "禁用"}`,
 			`抛竿距离: ${mod.settings.castDistance}`
@@ -124,13 +125,17 @@ module.exports = function EasyFishing(mod) {
 					mod.settings.autoCrafting = !mod.settings.autoCrafting;
 					command.message(`自动合成[鱼饵] ${mod.settings.autoCrafting ? "启用" : "禁用"}`);
 					break;
-				case "分解":
-					mod.settings.autoDismantling = !mod.settings.autoDismantling;
-					command.message(`自动分解[鱼] ${mod.settings.autoDismantling ? "启用" : "禁用"}`);
+				case "大物":
+					mod.settings.filterGolden = !mod.settings.filterGolden;
+					command.message(`保留大物[鱼类] ${mod.settings.filterGolden ? "启用" : "禁用"}`);
 					break;
 				case "出售":
 					mod.settings.autoSelling = !mod.settings.autoSelling;
-					command.message(`自动出售[鱼] ${mod.settings.autoSelling ? "启用" : "禁用"}`);
+					command.message(`自动出售[鱼类] ${mod.settings.autoSelling ? "启用" : "禁用"}`);
+					break;
+				case "分解":
+					mod.settings.autoDismantling = !mod.settings.autoDismantling;
+					command.message(`自动分解[鱼类] ${mod.settings.autoDismantling ? "启用" : "禁用"}`);
 					break;
 				case "丢弃":
 					value = parseInt(value);
@@ -139,7 +144,7 @@ module.exports = function EasyFishing(mod) {
 						command.message(`设定丢弃[数量] ${mod.settings.discardCount}`);
 					} else {
 						mod.settings.discardFilets = !mod.settings.discardFilets;
-						command.message(`自动丢弃[鱼] ${mod.settings.discardFilets ? "启用" : "禁用"}`);
+						command.message(`丢弃鱼肉[鱼] ${mod.settings.discardFilets ? "启用" : "禁用"}`);
 					}
 					break;
 				case "沙拉":
@@ -482,6 +487,10 @@ module.exports = function EasyFishing(mod) {
 				}
 			}
 			
+			if (mod.settings.filterGolden) {
+				itemsToProcess = itemsToProcess.filter(obj => obj.id <= 206500)
+			}
+			
 			if (!event.more) {
 				waitingInventory = false;
 				if (selling) {
@@ -537,7 +546,7 @@ module.exports = function EasyFishing(mod) {
 				command.message(`背包[鱼饵]已用尽...尝试合成`);
 				mod.setTimeout(() => {
 					startCraftingBait();
-				}, 5000);
+				}, 3000);
 			}
 		}
 	});
@@ -550,12 +559,12 @@ module.exports = function EasyFishing(mod) {
 		if (stream.uint64() === mod.game.me.gameId) {
 			if (debug) console.log("S_FISHING_BITE - me");
 			
-			// mod.setTimeout(() => {
+			mod.setTimeout(() => {
 				if (debug) console.log("C_START_FISHING_MINIGAME - true");
 				mod.toServer('C_START_FISHING_MINIGAME', 1, {
 					
 				});
-			// }, mod.settings.useRandomDelay ? rand(mod.settings.catchDelay, 2000) : 2000);
+			}, mod.settings.useRandomDelay ? rand(mod.settings.startGame, 1000) : 1000);
 		}
 	});
 
@@ -604,7 +613,7 @@ module.exports = function EasyFishing(mod) {
 				mod.toClient('S_CHAT', 2, {
 					channel: 7,
 					authorName: 'TIP',
-					message: `未曾访问过[杂货]NPC或离得太远, [自动出售]功能关闭!!!`
+					message: `未曾访问过[杂货]NPC或离得太远, 自动关闭[出售]功能!!!`
 				});
 				mod.settings.autoSelling = false;
 			}
