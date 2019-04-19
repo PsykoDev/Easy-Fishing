@@ -8,13 +8,15 @@ try {
 // 鱼饵关联信息
 const CRAFTABLE_BAITS = [
 	{name: "初階集魚餌", itemId: 206001, abnormalityId: 70272, recipeId: 204100},
-	{name: "中阶集鱼饵", itemId: 206002, abnormalityId: 70273, recipeId: 204101},
-	{name: "高阶集鱼饵", itemId: 206003, abnormalityId: 70274, recipeId: 204102},
-	{name: "最高集鱼饵", itemId: 206004, abnormalityId: 70275, recipeId: 204103},
-	
 	{name: "初階蚯蚓",   itemId: 206006, abnormalityId: 70282, recipeId: 204100},
+	
+	{name: "中阶集鱼饵", itemId: 206002, abnormalityId: 70273, recipeId: 204101},
 	{name: "中階蚯蚓",   itemId: 206007, abnormalityId: 70283, recipeId: 204101},
+	
+	{name: "高阶集鱼饵", itemId: 206003, abnormalityId: 70274, recipeId: 204102},
 	{name: "高階蚯蚓",   itemId: 206008, abnormalityId: 70284, recipeId: 204102},
+	
+	{name: "最高集鱼饵", itemId: 206004, abnormalityId: 70275, recipeId: 204103},
 	{name: "最階蚯蚓",   itemId: 206009, abnormalityId: 70285, recipeId: 204103}
 ];
 // 钓竿关联信息
@@ -51,48 +53,23 @@ module.exports = function EasyFishing(mod) {
 		waitingInventory = false,				// 筛选背包道具
 		itemsToProcess = [],					// 筛选出的道具
 		
-		selling = false,						// 出售 鱼
-		dismantling = false,					// 分解 鱼
+		selling = false,						// 出售鱼类
+		dismantling = false,					// 分解鱼类
 		cannotDismantle = false,				// 鱼肉饱和
-		discarding = false,						// 丢弃 鱼
+		discarding = false,						// 丢弃鱼类
 		useSalad = false,						// 使用沙拉
 		
-		lastContact = {},						// 
-		lastDialog = {},						// 
+		lastContact = {},						// 上一次NPC连接
+		lastDialog = {},						// 上一次NPC对话
 		
 		invenItems = [],						// 背包道具
-		baitAmount = 0,							// 鱼饵数量
-		debug = false;
+		baitAmount = 0,							// 冻结鱼饵数量
 
-	function rand([min, max], lowerBound) {
-		lowerBound = isNaN(lowerBound) ? Number.NEGATIVE_INFINITY : lowerBound;
-		min = parseInt(min);
-		max = parseInt(max);
-		
-		if (isNaN(min) || isNaN(max)) {
-			return lowerBound;
-		}
-		
-		const result = Math.floor(Math.random() * (max - min + 1)) + min;
-		if (debug) console.log("rand() - " + result);
-		return result >= lowerBound ? result : lowerBound;
-	}
-
-	function validate(value, lowerBound, upperBound, defaultValue) {
-		value = parseInt(value);
-		if (isNaN(value)) {
-			return defaultValue;
-		}
-		if (value < lowerBound) {
-			return lowerBound;
-		}
-		if (value > upperBound) {
-			return upperBound;
-		}
-
-		if (debug) console.log("validate( " + value + ", " + lowerBound + ", " + upperBound + ", " + defaultValue + " )");
-		return value;
-	}
+		nowDate = 0,
+		beginTime = 0,
+		waitTime = 0,
+		startTime = 0,
+		endTime = 0;
 
 	function send(msg) {
 		command.message([...arguments].join('\n\t - '))
@@ -101,7 +78,7 @@ module.exports = function EasyFishing(mod) {
 	function fishStatus() {
 		send(
 			` --- 钓鱼模组 各功能状态 ---`,
-			`自动合成: ${mod.settings.autoCrafting ? "启用" : "禁用"}`,
+			`鱼饵合成: ${mod.settings.autoCrafting ? "启用" : "禁用"}`,
 			`保留大物: ${mod.settings.filterGolden ? "启用" : "禁用"}`,
 			`自动出售: ${mod.settings.autoSelling ? "启用" : "禁用"}`,
 			`自动分解: ${mod.settings.autoDismantling ? "启用" : "禁用"}`,
@@ -115,27 +92,25 @@ module.exports = function EasyFishing(mod) {
 	mod.command.add("钓鱼", (arg, value) => {
 		if (!arg) {
 			mod.settings.enabled = !mod.settings.enabled;
-			command.message(`模组: ${mod.settings.enabled ? "已开启" : "已关闭"}`);
-			if (mod.settings.enabled) {
-				fishStatus();
-			}
+			command.message(`模组: ${mod.settings.enabled ? '<font color="#56B4E9">已开启</font>' : '<font color="#E69F00">已关闭</font>'}`);
+			if (mod.settings.enabled) { fishStatus(); }
 		} else {
 			switch (arg) {
 				case "合成":
 					mod.settings.autoCrafting = !mod.settings.autoCrafting;
-					command.message(`自动合成[鱼饵] ${mod.settings.autoCrafting ? "启用" : "禁用"}`);
+					command.message(`自动[合成]鱼饵 ${mod.settings.autoCrafting ? "启用" : "禁用"}`);
 					break;
 				case "大物":
 					mod.settings.filterGolden = !mod.settings.filterGolden;
-					command.message(`保留大物[鱼类] ${mod.settings.filterGolden ? "启用" : "禁用"}`);
+					command.message(`保留[大物]鱼类 ${mod.settings.filterGolden ? "启用" : "禁用"}`);
 					break;
 				case "出售":
 					mod.settings.autoSelling = !mod.settings.autoSelling;
-					command.message(`自动出售[鱼类] ${mod.settings.autoSelling ? "启用" : "禁用"}`);
+					command.message(`自动[出售]鱼类 ${mod.settings.autoSelling ? "启用" : "禁用"}`);
 					break;
 				case "分解":
 					mod.settings.autoDismantling = !mod.settings.autoDismantling;
-					command.message(`自动分解[鱼类] ${mod.settings.autoDismantling ? "启用" : "禁用"}`);
+					command.message(`自动[分解]鱼类 ${mod.settings.autoDismantling ? "启用" : "禁用"}`);
 					break;
 				case "丢弃":
 					value = parseInt(value);
@@ -144,7 +119,7 @@ module.exports = function EasyFishing(mod) {
 						command.message(`设定丢弃[数量] ${mod.settings.discardCount}`);
 					} else {
 						mod.settings.discardFilets = !mod.settings.discardFilets;
-						command.message(`丢弃鱼肉[鱼] ${mod.settings.discardFilets ? "启用" : "禁用"}`);
+						command.message(`自动[丢弃]鱼肉 ${mod.settings.discardFilets ? "启用" : "禁用"}`);
 					}
 					break;
 				case "沙拉":
@@ -153,7 +128,7 @@ module.exports = function EasyFishing(mod) {
 					break;
 				case "延迟":
 					mod.settings.useRandomDelay = !mod.settings.useRandomDelay;
-					command.message(`随机延迟[拉钩] ${mod.settings.useRandomDelay ? "启用" : "禁用"}`);
+					command.message(`随机[延迟]拉钩 ${mod.settings.useRandomDelay ? "启用" : "禁用"}`);
 					break;
 				case "距离":
 					value = parseInt(value);
@@ -167,10 +142,6 @@ module.exports = function EasyFishing(mod) {
 				case "状态":
 					fishStatus();
 					break;
-				case "debug":
-					debug = !debug;
-					command.message(`Debug ${debug ? "ON" : "OFF"}`);
-					break;
 				default :
 					command.message(`无效的参数!`)
 					break;
@@ -178,301 +149,74 @@ module.exports = function EasyFishing(mod) {
 		}
 	});
 
-	function startFishing() {
-		if (debug) console.log("startFishing() - fishingRod " + fishingRod);
-		
-		mod.toServer('C_USE_ITEM', 3, {
-			gameId: mod.game.me.gameId,
-			id: fishingRod,
-			dbid: 0,
-			target: 0,
-			amount: 1,
-			dest: 0,
-			loc: playerLocation,
-			w: playerAngle,
-			unk1: 0,
-			unk2: 0,
-			unk3: 0,
-			unk4: true
-		});
-	}
-
-	function startCraftingBait() {
-		if (debug) console.log("startCraftingBait() - crafting " + crafting);
-		if (debug) console.log("startCraftingBait() - successCount " + successCount);
-		
-		if (!crafting) {
-			successCount = 0;
-		}
-		
-		crafting = true;
-		mod.toServer('C_START_PRODUCE', 1, {
-			recipe: lastUsedBait.recipeId,
-			unk: 0
-		});
-	}
-
-	function startSelling() {
-		if (lastContact.gameId && lastDialog.id) {
-			if (debug) console.log("startSelling() - selling: true");
-			
-			itemsToProcess = [];
-			waitingInventory = true;
-			selling = true;
-			mod.toServer('C_SHOW_INVEN', 1, {
-				unk: 1
-			});
-		} else {
-			if (debug) console.log("startSelling() - selling: false");
-			
-			selling = false;
-			if (mod.settings.autoDismantling) {
-				command.message(`未记录最后一个对话的NPC, [自动出售]失败...尝试分解`);
-				mod.setTimeout(() => {
-					startDismantling();
-				}, 5000);
-			} else {
-				command.message(`未记录最后一个对话的NPC, [自动出售]失败...停止出售!`);
-			}
-		}
-	}
-
-	function startDismantling() {
-		if (debug) console.log("startDismantling() - dismantling " + dismantling);
-		
-		itemsToProcess = [];
-		waitingInventory = true;
-		dismantling = true;
-		mod.toServer('C_SHOW_INVEN', 1, {
-			unk: 1
-		});
-	}
-
-	function startDiscarding() {
-		if (debug) console.log("startDiscarding() - discarding " + discarding);
-		
-		discarding = true;
-		mod.toServer('C_SHOW_INVEN', 1, {
-			unk: 1
-		});
-	}
-
-	function processItemsToSell() {
-		if (itemsToProcess.length > 0) {
-			if (debug) console.log("itemsToProcess.length > 0");
-			
-			mod.toServer('C_NPC_CONTACT', 2, lastContact);
-			let dialogHook;
-			
-			const timeout = mod.setTimeout(() => {
-				if (dialogHook) {
-					mod.unhook(dialogHook);
-					selling = false;
-					
-					if (mod.settings.autoDismantling) {
-						command.message(`提交会话NPC超时 [自动出售]失败...尝试分解`);
-						startDismantling();
-					} else {
-						command.message(`提交会话NPC超时 [自动出售]失败...停止出售`);
-					}
-				}
-			}, 5000);
-			
-			dialogHook = mod.hookOnce('S_DIALOG', 2, event => {
-				mod.clearTimeout(timeout);
-				mod.toServer('C_DIALOG', 1, Object.assign(lastDialog, {
-					id: event.id
-				}));
-			});
-			
-			command.message(`正在添加[出售]项目...`);
-		}
-	}
-
-	function processItemsToDismantle() {
-		if (itemsToProcess.length > 0) {
-			if (debug) console.log("itemsToProcess.length > 0");
-			
-			mod.toServer('C_REQUEST_CONTRACT', 1, {
-				type: 89,
-				unk2: 0,
-				unk3: 0,
-				unk4: 0,
-				name: "",
-				data: Buffer.alloc(0)
-			})
-			
-			command.message(`正在添加[分解]项目...`);
-		}
-	}
-
 	mod.hook('C_NPC_CONTACT', 2, event => {
-		if (debug) console.log("C_NPC_CONTACT");
 		Object.assign(lastContact, event);
 	});
 
 	mod.hook('C_DIALOG', 1, event => {
-		if (debug) console.log("C_DIALOG");
 		Object.assign(lastDialog, event);
 	});
 
-	mod.hook('S_END_PRODUCE', 1, event => {
-		if (!mod.settings.enabled) return;
+	mod.hook('C_PLAYER_LOCATION', 5, event => {
+		if ([0, 1, 5, 6].includes(event.type)) {
+			Object.assign(playerLocation, event.loc);
+			playerAngle = event.w;
+		}
+	});
+
+	mod.hook('S_ABNORMALITY_BEGIN', 3, event => {
+		if (event.target === mod.game.me.gameId) {
+			currentBait = CRAFTABLE_BAITS.find(obj => obj.abnormalityId === event.id) || currentBait;
+			lastUsedBait = currentBait || lastUsedBait;
+		}
+	});
+
+	mod.hook('S_ABNORMALITY_END', 1, event => {
+		if (event.target !== mod.game.me.gameId) return;
 		
-		if (crafting) {
-			if (event.success) {
-				if (debug) console.log("S_END_PRODUCE - successCount:" + successCount);
-				
-				successCount++;
-				startCraftingBait();
+		if (currentBait && currentBait.abnormalityId === event.id) {
+			currentBait = null;
+		} else if (mod.settings.reUseFishSalad && event.id === 70261) {
+			useSalad = true;
+		}
+		
+		if (!mod.settings.enabled || !lastUsedBait) return;
+		
+		for (let i = 0; i < invenItems.length; i++) {
+			if (invenItems[i].id == lastUsedBait.itemId) {
+				baitAmount = invenItems[i].amount;
+				break;
 			} else {
-				if (debug) console.log("S_END_PRODUCE - crafting: false");
-				
-				crafting = false;
-				if (successCount == 0) {
-					if (mod.settings.autoDismantling) {
-						command.message(`鱼饵[合成]失败...尝试分解`);
-						startDismantling();
-					} else {
-						command.message(`材料[鱼肉]不足...停止合成`);
-					}
-				} else {
-					mod.toServer('C_USE_ITEM', 3, {
-						gameId: mod.game.me.gameId,
-						id: lastUsedBait.itemId,
-						dbid: 0,
-						target: 0,
-						amount: 1,
-						dest: 0,
-						loc: playerLocation,
-						w: playerAngle,
-						unk1: 0,
-						unk2: 0,
-						unk3: 0,
-						unk4: true
-					});
-					
-					mod.setTimeout(() => {
-						if (currentBait) {
-							command.message(`背包[鱼饵]已饱和...自动激活并开始钓鱼!`);
-							startFishing();
-						}
-					}, 5000);
-				}
+				baitAmount = 0;
 			}
 		}
 	});
 
-	mod.hook('S_REQUEST_CONTRACT', 1, event => {
-		if (!mod.settings.enabled) return;
+	mod.hook('S_SYSTEM_MESSAGE', 1, event => {
+		const msg = mod.parseSystemMessage(event.message);
 		
-		if (dismantling || selling) {
-			if (event.type == 89) {
-				if (debug) console.log("S_REQUEST_CONTRACT - type: 89");
-				
-				const handleContract = () => {
-					let delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
-					
-					for (let item of itemsToProcess.slice(0, 20)) {
-						mod.setTimeout(() => {
-							if (cannotDismantle) return;
-							mod.toServer('C_RQ_ADD_ITEM_TO_DECOMPOSITION_CONTRACT', 1, {
-								contract: event.id,
-								dbid: item.dbid,
-								id: item.id,
-								count: 1
-							});
-						}, delay);
-						delay += mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
-					}
-					
-					itemsToProcess = itemsToProcess.slice(20);
-					mod.setTimeout(() => {
-						mod.toServer('C_RQ_START_SOCIAL_ON_PROGRESS_DECOMPOSITION', 1, {
-							contract: event.id
-						});
-						
-						mod.setTimeout(() => {
-							if (cannotDismantle) {
-								itemsToProcess = [];
-								cannotDismantle = false;
-								dismantling = false;
-								
-								mod.toServer('C_CANCEL_CONTRACT', 1, {
-									type: 89,
-									id: event.id
-								});
-								
-								if (mod.settings.discardFilets && mod.settings.discardCount > 0) {
-									command.message(`无法[分解]更多鱼肉...尝试丢弃`);
-									mod.setTimeout(startDiscarding, 2000);
-								} else {
-									command.message(`背包[鱼肉]已饱和...停止分解`);
-								}
-								return;
-							}
-							
-							if (itemsToProcess.length > 0) {
-								handleContract();
-							} else {
-								dismantling = false;
-								
-								mod.toServer('C_CANCEL_CONTRACT', 1, {
-									type: 89,
-									id: event.id
-								});
-								command.message(`全部[分解]任务提交完成...开始钓鱼!`);
-								mod.setTimeout(startFishing, 2000);
-							}
-						}, 3000);
-					}, delay);
-				};
-				handleContract();
-			} else if (event.type === 9) {
-				if (debug) console.log("S_REQUEST_CONTRACT - type: 9");
-				
-				if (itemsToProcess.length > 0) {
-					let delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
-					
-					for (let item of itemsToProcess.slice(0, 8)) {
-						mod.setTimeout(() => {
-							mod.toServer('C_STORE_SELL_ADD_BASKET', 1, {
-								cid: mod.game.me.gameId,
-								npc: event.id,
-								item: item.id,
-								quantity: 1,
-								slot: item.slot
-							});
-						}, delay);
-						delay += mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
-					}
-					itemsToProcess = itemsToProcess.slice(8);
-					mod.setTimeout(() => {
-						mod.toServer('C_STORE_COMMIT', 1, {
-							gameId: mod.game.me.gameId,
-							contract: event.id
-						});
-					}, delay);
-				} else {
-					selling = false;
-					
-					mod.toServer('C_CANCEL_CONTRACT', 1, {
-						type: 9,
-						id: event.id
-					});
-					command.message(`全部[出售]任务提交完成...开始钓鱼!`);
-					mod.setTimeout(startFishing, 2000);
+		if (msg) {
+			if (mod.settings.autoCrafting && lastUsedBait && msg.id === 'SMT_CANNOT_FISHING_NON_BAIT') {
+				command.message(`未激活[鱼饵]...!`);
+			} else if (msg.id === 'SMT_CANNOT_FISHING_FULL_INVEN') {
+				if (mod.settings.autoSelling && !selling) {
+					command.message(`背包[空间]不足...尝试出售`);
+					startSelling();
 				}
-			} else {
-				if (debug) console.log("S_REQUEST_CONTRACT - dismantling: false / selling: false");
+				
+				if (mod.settings.autoDismantling && !selling && !dismantling) {
+					command.message(`背包[空间]不足...尝试分解`);
+					startDismantling();
+				}
+			} else if (msg.id === 'SMT_ITEM_CANT_POSSESS_MORE' && msg.tokens && msg.tokens['ItemName'] === '@item:204052') {
+				cannotDismantle = true;
+				command.message(`背包[鱼肉]太多...停止分解!`);
 			}
 		}
 	});
 
 	mod.hook('S_INVEN', 18, event => {
-		if (lastUsedBait) {
-			invenItems = event.first ? event.items : invenItems.concat(event.items);
-		}
+		invenItems = event.first ? event.items : invenItems.concat(event.items);
 		
 		if (!selling && !dismantling && !discarding) return;
 		
@@ -510,84 +254,48 @@ module.exports = function EasyFishing(mod) {
 						slot: item.slot - 40,
 						amount: Math.min(item.amount, mod.settings.discardCount)
 					});
-					command.message(`已完成[丢弃]任务...开始钓鱼!`);
-					mod.setTimeout(startFishing, 2000);
+					
+					command.message(`已完成[丢弃]任务...恢复钓鱼!`);
+					mod.setTimeout(startFishing, 5000);
 					break;
 				}
 			}
 			
 			if (!event.more && discarding) {
 				discarding = false;
-				command.message(`发生了一些很奇怪的事情, 不能[丢弃]鱼`);
+				command.message(`发生了一些很奇怪的事情, 不能[丢弃]鱼...停止钓鱼!`);
 			}
 		}
 	});
 
-	mod.hook('C_CAST_FISHING_ROD', 'raw', (code, data) => {
-		if (!mod.settings.enabled) return;
-		
-		if (debug) console.log("C_CAST_FISHING_ROD");
-		data[20] = validate(mod.settings.castDistance, 0, 18, 3);
-		return true;
-	});
-
-	mod.hook('S_CAST_FISHING_ROD', 'raw', (code, data) => {
-		if (!mod.settings.enabled) return;
-		const stream = new Readable(data);
-		stream.position = 4;
-		
-		if (stream.uint64() === mod.game.me.gameId) {
-			if (debug) console.log("S_CAST_FISHING_ROD - me");
-			
-			stream.position = 25;
-			fishingRod = stream.uint32();
-			
-			if (baitAmount === 0 && !currentBait && lastUsedBait) {
-				command.message(`背包[鱼饵]已用尽...尝试合成`);
-				mod.setTimeout(() => {
-					startCraftingBait();
-				}, 3000);
-			}
-		}
-	});
-
-	mod.hook('S_FISHING_BITE', 'raw', (code, data) => {
-		if (!mod.settings.enabled) return;
-		const stream = new Readable(data);
-		stream.position = 8;
-		
-		if (stream.uint64() === mod.game.me.gameId) {
-			if (debug) console.log("S_FISHING_BITE - me");
-			
-			mod.setTimeout(() => {
-				if (debug) console.log("C_START_FISHING_MINIGAME - true");
-				mod.toServer('C_START_FISHING_MINIGAME', 1, {
-					
-				});
-			}, mod.settings.useRandomDelay ? rand(mod.settings.startGame, 1000) : 1000);
-		}
-	});
-
-	mod.hook('S_START_FISHING_MINIGAME', 'raw', (code, data) => {
-		if (!mod.settings.enabled) return;
-		const stream = new Readable(data);
-		stream.position = 8;
-		
-		if (stream.uint64() === mod.game.me.gameId) {
-			if (debug) console.log("S_START_FISHING_MINIGAME - me");
-			
-			mod.setTimeout(() => {
-				if (debug) console.log("C_END_FISHING_MINIGAME - success: true");
-				mod.toServer('C_END_FISHING_MINIGAME', 1, {
-					success: true
-				});
-			}, mod.settings.useRandomDelay ? rand(mod.settings.catchDelay, 2000) : 2000);
-			return false;
-		}
-	});
+	function startFishing() {
+		mod.toServer('C_USE_ITEM', 3, {
+			gameId: mod.game.me.gameId,
+			id: fishingRod,
+			dbid: 0,
+			target: 0,
+			amount: 1,
+			dest: 0,
+			loc: playerLocation,
+			w: playerAngle,
+			unk1: 0,
+			unk2: 0,
+			unk3: 0,
+			unk4: true
+		});
+	}
 
 	mod.hook('C_USE_ITEM', 3, event => {
-		if (RODS.includes(event.id)) {
+		if (mod.settings.enabled && RODS.includes(event.id)) {
+			if (mod.settings.autoSelling && (!lastContact.gameId || !lastDialog.id)) {
+				mod.toClient('S_CHAT', 2, {
+					channel: 7,
+					authorName: 'TIP',
+					message: `未曾访问过[杂货]NPC或离得太远, 自动关闭[出售]功能!!!`
+				});
+				mod.settings.autoSelling = false;
+			}
+			
 			if (useSalad) {
 				mod.toServer('C_USE_ITEM', 3, {
 					gameId: mod.game.me.gameId,
@@ -604,103 +312,325 @@ module.exports = function EasyFishing(mod) {
 					unk4: true
 				});
 				useSalad = false;
-				command.message(`已使用背包[沙拉]...开始钓鱼!`);
-				mod.setTimeout(startFishing, 2000);
+				
+				command.message(`已使用背包[沙拉]...恢复钓鱼!`);
+				mod.setTimeout(startFishing, 5000);
 				return false;
 			}
-			
-			if (mod.settings.autoSelling && (!lastContact.gameId || !lastDialog.id)) {
-				mod.toClient('S_CHAT', 2, {
-					channel: 7,
-					authorName: 'TIP',
-					message: `未曾访问过[杂货]NPC或离得太远, 自动关闭[出售]功能!!!`
-				});
-				mod.settings.autoSelling = false;
-			}
 		}
 	});
 
-	mod.hook('C_PLAYER_LOCATION', 5, event => {
-		if ([0, 1, 5, 6].includes(event.type)) {
-			Object.assign(playerLocation, event.loc);
-			playerAngle = event.w;
-		}
-	});
-
-	mod.hook('S_ABNORMALITY_BEGIN', 3, event => {
-		if (event.target === mod.game.me.gameId) {
-			currentBait = CRAFTABLE_BAITS.find(obj => obj.abnormalityId === event.id) || currentBait;
-			lastUsedBait = currentBait || lastUsedBait;
-		}
-	});
-
-	mod.hook('S_ABNORMALITY_END', 1, event => {
-		if (event.target !== mod.game.me.gameId) return;
-		
-		if (currentBait && currentBait.abnormalityId === event.id) {
-			currentBait = null;
-		} else if (event.id === 70261 && mod.settings.reUseFishSalad) {
-			useSalad = true;
-		}
-		
-		if (!mod.settings.enabled || !lastUsedBait) return;
-		
-		for (let i = 0; i < invenItems.length; i++) {
-			if (invenItems[i].id == lastUsedBait.itemId) {
-				baitAmount = invenItems[i].amount;
-				break;
-			} else {
-				baitAmount = 0;
-			}
-		}
-		if (debug) console.log(baitAmount);
-		command.message(`${lastUsedBait.name} 剩余 ${baitAmount}`);
-	});
-
-	mod.hook('S_SYSTEM_MESSAGE', 1, event => {
+	mod.hook('C_CAST_FISHING_ROD', 'raw', (code, data) => {
 		if (!mod.settings.enabled) return;
 		
-		const msg = mod.parseSystemMessage(event.message);
-		if (msg) {
-			if (mod.settings.autoCrafting && lastUsedBait && msg.id === 'SMT_CANNOT_FISHING_NON_BAIT') {
-				mod.toServer('C_USE_ITEM', 3, {
-					gameId: mod.game.me.gameId,
-					id: lastUsedBait.itemId,
-					dbid: 0,
-					target: 0,
-					amount: 1,
-					dest: 0,
-					loc: playerLocation,
-					w: playerAngle,
-					unk1: 0,
-					unk2: 0,
-					unk3: 0,
-					unk4: true
-				});
-				mod.setTimeout(() => {
-					if (!currentBait && lastUsedBait) {
-						command.message(`未激活[鱼饵]...尝试合成`);
-						startCraftingBait();
-					} else {
-						command.message(`未激活[鱼饵]...自动激活并开始钓鱼!`);
-						startFishing();
-					}
-				}, 3000);
-			} else if (msg.id === 'SMT_CANNOT_FISHING_FULL_INVEN') {
-				if (mod.settings.autoSelling && !selling) {
-					command.message(`背包[空间]不足...尝试出售`);
-					startSelling();
-				}
-				
-				if (mod.settings.autoDismantling && !selling && !dismantling) {
-					command.message(`背包[空间]不足...尝试分解`);
-					startDismantling();
-				}
-			} else if (msg.id === 'SMT_ITEM_CANT_POSSESS_MORE' && msg.tokens && msg.tokens['ItemName'] === '@item:204052') {
-				cannotDismantle = true;
-				command.message(`背包[鱼]太多...停止钓鱼!`);
+		data[20] = validate(mod.settings.castDistance, 0, 18, 3);
+		return true;
+	});
+
+	mod.hook('S_CAST_FISHING_ROD', 'raw', (code, data) => {
+		if (!mod.settings.enabled) return;
+		
+		const stream = new Readable(data);
+		stream.position = 4;
+		if (stream.uint64() === mod.game.me.gameId) {
+			stream.position = 25;
+			fishingRod = stream.uint32();
+			
+			nowDate = new Date();
+			beginTime = nowDate.getTime();
+			if (baitAmount === 0 && !currentBait && lastUsedBait) {
+				command.message(`~钓鱼停止~ ${lastUsedBait.name} 已经用尽...尝试合成`);
+				mod.setTimeout(startCraftingBait, 5000);
+			}
+			
+			if (baitAmount !== 0) {
+				command.message(`~钓鱼开始~ ${lastUsedBait.name} 剩余 ${baitAmount}`);
 			}
 		}
 	});
+
+	mod.hook('S_FISHING_BITE', 1, event => {
+		if (!mod.settings.enabled || event.gameId !== mod.game.me.gameId) return;
+		
+		nowDate = new Date();
+		waitTime = (nowDate.getTime() - beginTime);
+		command.message(`~有鱼上钩~ ` + waitTime/1000 + ` s`);
+		
+		startTime = rand(mod.settings.startDelay, 1000);
+		mod.setTimeout(() => {
+			mod.toServer('C_START_FISHING_MINIGAME', 1, {   });
+			command.message(`~开始游戏~ ` + startTime + ` ms`);
+		}, mod.settings.useRandomDelay ? startTime : 1000);
+	})
+
+	mod.hook('S_START_FISHING_MINIGAME', 1, event => {
+		if (!mod.settings.enabled || event.gameId !== mod.game.me.gameId) return;
+		
+		endTime = rand(mod.settings.catchDelay, 2000);
+		mod.setTimeout(() => {
+			mod.toServer('C_END_FISHING_MINIGAME', 1, { success: true });
+			nowDate = new Date();
+			command.message(`~完成游戏~ ` + endTime + ` ms - [Lv` + event.level + `] ` + (nowDate.getTime()-beginTime)/1000 + ` s`);
+		}, mod.settings.useRandomDelay ? endTime : 2000);
+		return false;
+	})
+
+	function startCraftingBait() {
+		if (!crafting) { successCount = 0; }
+		crafting = true;
+		
+		mod.toServer('C_START_PRODUCE', 1, {
+			recipe: lastUsedBait.recipeId,
+			unk: 0
+		});
+	}
+
+	mod.hook('S_END_PRODUCE', 1, event => {
+		if (!mod.settings.enabled) return;
+		
+		if (crafting) {
+			if (event.success) {
+				successCount++;
+				command.message(`鱼饵[合成]成功...` + lastUsedBait.name + `x` + successCount + `次`);
+				startCraftingBait();
+			} else {
+				crafting = false;
+				
+				if (successCount == 0 && mod.settings.autoDismantling) {
+					command.message(`鱼饵[合成]失败...尝试分解`);
+					mod.setTimeout(startDismantling, 5000);
+					return;
+				}
+				
+				command.message(`背包[鱼饵]过多或[鱼肉]材料不足...恢复钓鱼!`);
+				
+				mod.setTimeout(() => {
+					mod.toServer('C_USE_ITEM', 3, {
+						gameId: mod.game.me.gameId,
+						id: lastUsedBait.itemId,
+						dbid: 0,
+						target: 0,
+						amount: 1,
+						dest: 0,
+						loc: playerLocation,
+						w: playerAngle,
+						unk1: 0,
+						unk2: 0,
+						unk3: 0,
+						unk4: true
+					});
+					command.message(`~激活鱼饵~ ` + lastUsedBait.name);
+				}, 2000);
+				
+				mod.setTimeout(startFishing, 5000);
+			}
+		}
+	});
+
+	mod.hook('S_REQUEST_CONTRACT', 1, event => {
+		if (!mod.settings.enabled) return;
+		
+		if (dismantling || selling) {
+			if (event.type == 89) {
+				const handleContract = () => {
+					let delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
+					
+					for (let item of itemsToProcess.slice(0, 20)) {
+						mod.setTimeout(() => {
+							if (cannotDismantle) return;
+							mod.toServer('C_RQ_ADD_ITEM_TO_DECOMPOSITION_CONTRACT', 1, {
+								contract: event.id,
+								dbid: item.dbid,
+								id: item.id,
+								count: 1
+							});
+						}, delay);
+						delay += mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
+					}
+					
+					itemsToProcess = itemsToProcess.slice(20);
+					mod.setTimeout(() => {
+						mod.toServer('C_RQ_START_SOCIAL_ON_PROGRESS_DECOMPOSITION', 1, {
+							contract: event.id
+						});
+						
+						mod.setTimeout(() => {
+							if (cannotDismantle) {
+								itemsToProcess = [];
+								cannotDismantle = false;
+								dismantling = false;
+								mod.toServer('C_CANCEL_CONTRACT', 1, {
+									type: 89,
+									id: event.id
+								});
+								
+								if (mod.settings.discardFilets && mod.settings.discardCount > 0) {
+									command.message(`无法[分解]更多鱼肉...尝试丢弃`);
+									mod.setTimeout(startDiscarding, 5000);
+								} else {
+									command.message(`背包[鱼肉]已经饱和...停止分解`);
+								}
+								return;
+							}
+							
+							if (itemsToProcess.length > 0) {
+								handleContract();
+							} else {
+								dismantling = false;
+								mod.toServer('C_CANCEL_CONTRACT', 1, {
+									type: 89,
+									id: event.id
+								});
+								
+								command.message(`全部[分解]任务提交完成...恢复钓鱼!`);
+								mod.setTimeout(startFishing, 5000);
+							}
+						}, 5000);
+					}, (5000+delay));
+				};
+				handleContract();
+			} else if (event.type === 9) {
+				if (itemsToProcess.length > 0) {
+					let delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
+					
+					for (let item of itemsToProcess.slice(0, 18)) {
+						mod.setTimeout(() => {
+							mod.toServer('C_STORE_SELL_ADD_BASKET', 1, {
+								cid: mod.game.me.gameId,
+								npc: event.id,
+								item: item.id,
+								quantity: 1,
+								slot: item.slot
+							});
+						}, delay);
+						delay += mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
+					}
+					
+					itemsToProcess = itemsToProcess.slice(18);
+					mod.setTimeout(() => {
+						mod.toServer('C_STORE_COMMIT', 1, {
+							gameId: mod.game.me.gameId,
+							contract: event.id
+						});
+					}, (5000+delay));
+				} else {
+					selling = false;
+					
+					mod.toServer('C_CANCEL_CONTRACT', 1, {
+						type: 9,
+						id: event.id
+					});
+					
+					command.message(`全部[出售]任务提交完成...恢复钓鱼!`);
+					mod.setTimeout(startFishing, 5000);
+				}
+			}
+		}
+	});
+
+	function startSelling() {
+		if (lastContact.gameId && lastDialog.id) {
+			waitingInventory = true;
+			itemsToProcess = [];
+			
+			selling = true;
+			mod.toServer('C_SHOW_INVEN', 1, {
+				unk: 1
+			});
+		} else {
+			selling = false;
+			if (mod.settings.autoDismantling) {
+				command.message(`未记录最后一个对话的NPC...尝试分解`);
+				mod.setTimeout(startDismantling, 5000);
+			}
+		}
+	}
+
+	function processItemsToSell() {
+		if (itemsToProcess.length > 0) {
+			command.message(`...正在添加[出售]项目`);
+			mod.toServer('C_NPC_CONTACT', 2, lastContact);
+			
+			let dialogHook;
+			const timeout = mod.setTimeout(() => {
+				if (dialogHook) {
+					mod.unhook(dialogHook);
+					
+					selling = false;
+					if (mod.settings.autoDismantling) {
+						command.message(`提交会话NPC超时...尝试分解`);
+						startDismantling();
+					}
+				}
+			}, 5000);
+			
+			dialogHook = mod.hookOnce('S_DIALOG', 2, event => {
+				mod.clearTimeout(timeout);
+				mod.toServer('C_DIALOG', 1, Object.assign(lastDialog, {
+					id: event.id
+				}));
+			});
+		}
+	}
+
+	function startDismantling() {
+		waitingInventory = true;
+		itemsToProcess = [];
+		
+		dismantling = true;
+		mod.toServer('C_SHOW_INVEN', 1, {
+			unk: 1
+		});
+	}
+
+	function processItemsToDismantle() {
+		if (itemsToProcess.length > 0) {
+			command.message(`...正在添加[分解]项目`);
+			mod.toServer('C_REQUEST_CONTRACT', 1, {
+				type: 89,
+				unk2: 0,
+				unk3: 0,
+				unk4: 0,
+				name: "",
+				data: Buffer.alloc(0)
+			})
+		}
+	}
+
+	function startDiscarding() {
+		discarding = true;
+		mod.toServer('C_SHOW_INVEN', 1, {
+			unk: 1
+		});
+	}
+
+	function rand([min, max], lowerBound) {
+		lowerBound = isNaN(lowerBound) ? Number.NEGATIVE_INFINITY : lowerBound;
+		min = parseInt(min);
+		max = parseInt(max);
+		
+		if (isNaN(min) || isNaN(max)) {
+			return lowerBound;
+		}
+		
+		const result = Math.floor(Math.random() * (max - min + 1)) + min;
+		return result >= lowerBound ? result : lowerBound;
+	}
+
+	function validate(value, lowerBound, upperBound, defaultValue) {
+		value = parseInt(value);
+		
+		if (isNaN(value)) {
+			return defaultValue;
+		}
+		if (value < lowerBound) {
+			return lowerBound;
+		}
+		if (value > upperBound) {
+			return upperBound;
+		}
+		
+		return value;
+	}
 
 }

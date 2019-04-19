@@ -1,9 +1,9 @@
 {
     "files": {
-        "README.md": "dc1955d571746e5bfd771ce7e61586eaf23b5f87f97a2e747ea885a108b91106",
-        "index.js": "772b4e5870fb5e82b4b21ec11c0c21d2b13852a7607bf2ca863657288db71f1a",
-        "module.json": "daa1c761471df423129bee5cda263d874ac3a2d62071e5203b7a4fdba87fcb98",
-        "settings_migrator.js": "55d175e0e684f10a2c27861492974aa135980a2ce60d518efca4ea16e40a96e0"
+        "README.md": "c8b2c6c6e870ed97b777576323a58a090b2bcad93eaccad29c50f74b398db628",
+        "index.js": "4fd9b0888d54d8be9c94bc4a44ac291ad28f7b5f5914301ae39d6dfb0f0cbf2c",
+        "module.json": "d963820b3b3bc1638442187509163a75d1aeb1bddd31e01b6939486538a961bf",
+        "settings_migrator.js": "8318f6aa8fdbf37eca23269f9779168f9281dfe6a5d63b99c9c8603756914d1b"
     },
     "defs": {
         "C_CANCEL_CONTRACT": 1,
@@ -28,10 +28,10 @@
         "S_CHAT": 2,
         "S_DIALOG": 2,
         "S_END_PRODUCE": 1,
-        "S_FISHING_BITE": "raw",
+        "S_FISHING_BITE": 1,
         "S_INVEN": 18,
         "S_REQUEST_CONTRACT": 1,
-        "S_START_FISHING_MINIGAME": "raw",
+        "S_START_FISHING_MINIGAME": 1,
         "S_SYSTEM_MESSAGE": 1
     }
 }

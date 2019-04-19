@@ -1,19 +1,18 @@
 const DefaultSettings = {
     "enabled": false,
-    "autoCrafting": true,           // 合成鱼饵
-    "filterGolden": true,           // 保留金鱼
-    "autoSelling": true,            // 出售 鱼
-    "autoDismantling": true,        // 分解 鱼
-    "discardFilets": true,          // 丢弃 鱼
-    "discardCount": 500,            // 丢弃数量
-    "reUseFishSalad": true,         // 食用沙拉
-    "useRandomDelay": true,         // 拉钩延迟
-    "startGame": [1000, 2000],       // 开始游戏 最低 最高 毫秒(ms)
-    "catchDelay": [2000, 8000],     // 完成游戏 最低 最高 毫秒(ms)
-    "moveItemDelay": [200, 500],    // 添加 鱼 的延迟
-    "castDistance": 3,              // 抛竿距离 0 ~ 18
-
-    "autoDismantleFishes": [ // 自动分解的鱼类
+    "autoCrafting": true,        // 合成鱼饵
+    "filterGolden": true,        // 保留金鱼
+    "autoSelling": true,         // 出售 鱼
+    "autoDismantling": true,     // 分解 鱼
+    "discardFilets": true,       // 丢弃 鱼
+    "discardCount": 500,         // 丢弃数量
+    "reUseFishSalad": true,      // 食用沙拉
+    "useRandomDelay": true,      // 拉钩延迟
+    "startDelay": [1000, 2000],  // 开始游戏 最低 最高 毫秒(ms)
+    "catchDelay": [2000, 8000],  // 完成游戏 最低 最高 毫秒(ms)
+    "moveItemDelay": [200, 500], // 添加 鱼 的延迟
+    "castDistance": 3,           // 抛竿距离 0 ~ 18
+    "autoDismantleFishes": [     // 自动分解的鱼类
         206400, // [0等级]罗汉鱼
         206401, // [0等級]蓝颊鲫鱼
 
@@ -72,8 +71,7 @@ const DefaultSettings = {
         206508, // [大物]黑尾鳍鲔
         206509  // [大物]黄金鲫鱼
     ],
-
-    "autoSellFishes": [ // 自动出售的鱼类
+    "autoSellFishes": [          // 自动出售的鱼类
         206400, // Stone Moroko
         206401, // Azurecheek Carp
         206402, // Crayfish

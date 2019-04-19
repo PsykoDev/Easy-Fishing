@@ -6,11 +6,11 @@
         "guiName": "快速钓鱼",
         "settingsFile": "config.json",
         "settingsMigrator": "settings_migrator.js",
-        "settingsVersion": 1
+        "settingsVersion": 2
     },
     "author": "ZC",
-    "description": "自动 钓鱼/出售/合成/分解/丢弃/沙拉/延迟/钓距/游戏难度最低(快速钓鱼)",
+    "description": "自动钓鱼/出售/合成/分解/丢弃/沙拉/延迟/钓距",
     "servers": ["https://raw.githubusercontent.com/zc149352394/Easy-Fishing/master/"],
     "supportUrl": "https://github.com/zc149352394/Easy-Fishing/issues",
-    "version": "80.04"
+    "version": "81.03"
 }
