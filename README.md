@@ -63,9 +63,19 @@ Easy-Fishing 快速钓鱼
 
 ------
 
-感谢原作者: https://github.com/terastuff/easy-fishing
+自动钓鱼 自动分解 [系统]参考:
 
-效果图如下
+https://github.com/Lambda11/let-me-fish
+
+https://github.com/SoliaRdi/auto-fishing
+
+自动出售 [系统]参考:
+
+https://github.com/terastuff/easy-fishing
+
+https://github.com/TerableCoder/TerableAngler
+
+效果图如下:
 
 ![screenshot](https://github.com/zc149352394/Easy-Fishing/blob/master/screenshot/01.png)
 
