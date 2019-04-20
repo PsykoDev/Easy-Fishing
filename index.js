@@ -69,7 +69,9 @@ module.exports = function EasyFishing(mod) {
 		beginTime = 0,
 		waitTime = 0,
 		startTime = 0,
-		endTime = 0;
+		endTime = 0,
+
+		debug = false;
 
 	function send(msg) {
 		command.message([...arguments].join('\n\t - '))
@@ -142,6 +144,10 @@ module.exports = function EasyFishing(mod) {
 				case "状态":
 					fishStatus();
 					break;
+				case "debug":
+					debug = !debug;
+					command.message(`debug ${debug ? "on" : "off"}`);
+					break;
 				default :
 					command.message(`无效的参数!`)
 					break;
@@ -174,7 +180,7 @@ module.exports = function EasyFishing(mod) {
 	mod.hook('S_ABNORMALITY_END', 1, event => {
 		if (event.target !== mod.game.me.gameId) return;
 		
-		if (currentBait && currentBait.abnormalityId === event.id) {
+		if (currentBait && event.id === currentBait.abnormalityId) {
 			currentBait = null;
 		} else if (mod.settings.reUseFishSalad && event.id === 70261) {
 			useSalad = true;
@@ -182,9 +188,9 @@ module.exports = function EasyFishing(mod) {
 		
 		if (!mod.settings.enabled || !lastUsedBait) return;
 		
-		for (let i = 0; i < invenItems.length; i++) {
-			if (invenItems[i].id == lastUsedBait.itemId) {
-				baitAmount = invenItems[i].amount;
+		for (const item of invenItems) {
+			if (item.id == lastUsedBait.itemId) {
+				baitAmount = item.amount;
 				break;
 			} else {
 				baitAmount = 0;
@@ -194,24 +200,63 @@ module.exports = function EasyFishing(mod) {
 
 	mod.hook('S_SYSTEM_MESSAGE', 1, event => {
 		const msg = mod.parseSystemMessage(event.message);
-		
-		if (msg) {
-			if (mod.settings.autoCrafting && lastUsedBait && msg.id === 'SMT_CANNOT_FISHING_NON_BAIT') {
-				command.message(`未激活[鱼饵]...!`);
-			} else if (msg.id === 'SMT_CANNOT_FISHING_FULL_INVEN') {
+//if (debug) console.log(msg)
+		switch (msg.id) {
+			case 'SMT_ITEM_USED_ACTIVE':											// 2958
+				if (currentBait) {
+					command.message(`模组自动开启...已激活[鱼饵] ${currentBait.name}`);
+					mod.settings.enabled = true;
+				}
+				break;
+			case 'SMT_ITEM_USED_DEACTIVE':											// 2959
+				if (lastUsedBait) {
+					command.message(`模组自动关闭...已冻结[鱼饵] ${lastUsedBait.name}`);
+					mod.settings.enabled = false;
+				}
+				break;
+			case 'SMT_FISHING_RESULT_SUCCESS':										// 4138
+if (debug) console.log(msg)
+				break;
+			//SMT_FISHING_RESULT_FAIL 4139
+			case 'SMT_FISHING_RESULT_CANCLE':										// 4140
+				command.message(`模组自动关闭...钓鱼已取消`);
+				mod.settings.enabled = false;
+				break;
+			/* 
+			case 'SMT_CANNOT_FISHING_NON_BAIT':										// 4133
+				if (mod.settings.autoCrafting && lastUsedBait) {
+					command.message(`未能开启钓鱼...请未激活[鱼饵]!`);
+				}
+				break;
+			 */
+			/* 
+			case 'SMT_CANNOT_FISHING_NON_AREA':										// 4134
+				if (mod.settings.autoCrafting && lastUsedBait) {
+					command.message(`未能开启钓鱼...请未激活[鱼饵]!`);
+				}
+				break;
+			 */
+			case 'SMT_CANNOT_FISHING_FULL_INVEN':									// 4135
 				if (mod.settings.autoSelling && !selling) {
 					command.message(`背包[空间]不足...尝试出售`);
 					startSelling();
 				}
-				
 				if (mod.settings.autoDismantling && !selling && !dismantling) {
 					command.message(`背包[空间]不足...尝试分解`);
 					startDismantling();
 				}
-			} else if (msg.id === 'SMT_ITEM_CANT_POSSESS_MORE' && msg.tokens && msg.tokens['ItemName'] === '@item:204052') {
-				cannotDismantle = true;
-				command.message(`无法再添加[分解]项目!`);
-			}
+				break;
+			case 'SMT_ITEM_CANT_POSSESS_MORE':										// 40
+				if (msg.tokens && msg.tokens['ItemName'] === '@item:204052') {
+					command.message(`背包[鱼肉]太多...停止分解!`);
+					cannotDismantle = true;
+				}
+				break;
+			/* 
+			case 'SMT_GENERAL_CANT_REG_ITEM_LIMIT':									// 3123
+				command.message(`无法再登录道具!! - [分解栏]`);
+				break;
+			 */
 		}
 	});
 
@@ -402,7 +447,7 @@ module.exports = function EasyFishing(mod) {
 					return;
 				}
 				
-				command.message(`背包[鱼饵]过多或[鱼肉]材料不足...恢复钓鱼!`);
+				command.message(`鱼饵[合成]结束...恢复钓鱼!`);
 				
 				mod.setTimeout(() => {
 					mod.toServer('C_USE_ITEM', 3, {
@@ -431,10 +476,10 @@ module.exports = function EasyFishing(mod) {
 		if (!mod.settings.enabled) return;
 		
 		if (dismantling || selling) {
+			var delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
+			
 			if (event.type == 89) {
 				const handleContract = () => {
-					let delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
-					
 					for (let item of itemsToProcess.slice(0, 20)) {
 						mod.setTimeout(() => {
 							if (cannotDismantle) return;
@@ -467,8 +512,6 @@ module.exports = function EasyFishing(mod) {
 								if (mod.settings.discardFilets && mod.settings.discardCount > 0) {
 									command.message(`无法[分解]更多鱼肉...尝试丢弃`);
 									mod.setTimeout(startDiscarding, 5000);
-								} else {
-									command.message(`背包[鱼肉]已经饱和...停止分解`);
 								}
 								return;
 							}
@@ -491,8 +534,6 @@ module.exports = function EasyFishing(mod) {
 				handleContract();
 			} else if (event.type === 9) {
 				if (itemsToProcess.length > 0) {
-					let delay = mod.settings.useRandomDelay ? rand(mod.settings.moveItemDelay, 200) : 200;
-					
 					for (let item of itemsToProcess.slice(0, 18)) {
 						mod.setTimeout(() => {
 							mod.toServer('C_STORE_SELL_ADD_BASKET', 1, {
@@ -515,7 +556,6 @@ module.exports = function EasyFishing(mod) {
 					}, (5000+delay));
 				} else {
 					selling = false;
-					
 					mod.toServer('C_CANCEL_CONTRACT', 1, {
 						type: 9,
 						id: event.id
@@ -529,6 +569,8 @@ module.exports = function EasyFishing(mod) {
 	});
 
 	function startSelling() {
+		command.message(`------开启[自动出售]系统------`);
+		
 		if (lastContact.gameId && lastDialog.id) {
 			waitingInventory = true;
 			itemsToProcess = [];
@@ -574,6 +616,8 @@ module.exports = function EasyFishing(mod) {
 	}
 
 	function startDismantling() {
+		command.message(`------开启[自动分解]系统------`);
+		
 		waitingInventory = true;
 		itemsToProcess = [];
 		
@@ -598,6 +642,8 @@ module.exports = function EasyFishing(mod) {
 	}
 
 	function startDiscarding() {
+		command.message(`------开启[自动丢弃]系统------`);
+		
 		discarding = true;
 		mod.toServer('C_SHOW_INVEN', 1, {
 			unk: 1
