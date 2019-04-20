@@ -210,7 +210,7 @@ module.exports = function EasyFishing(mod) {
 				}
 			} else if (msg.id === 'SMT_ITEM_CANT_POSSESS_MORE' && msg.tokens && msg.tokens['ItemName'] === '@item:204052') {
 				cannotDismantle = true;
-				command.message(`背包[鱼肉]太多...停止分解!`);
+				command.message(`无法再添加[分解]项目!`);
 			}
 		}
 	});

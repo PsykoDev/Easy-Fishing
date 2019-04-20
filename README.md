@@ -65,15 +65,25 @@ Easy-Fishing 快速钓鱼
 
 自动钓鱼 自动分解 [系统]参考:
 
+https://github.com/terastuff/easy-fishing
+
 https://github.com/Lambda11/let-me-fish
 
 https://github.com/SoliaRdi/auto-fishing
 
 自动出售 [系统]参考:
 
-https://github.com/terastuff/easy-fishing
-
 https://github.com/TerableCoder/TerableAngler
+
+------
+
+# 已知BUG:
+
+在 高延迟(ping)的情况下 出售/分解任务的 [添加]事件 时间落后于 [提交]事件
+
+导致 循环 出售/分解
+
+------
 
 效果图如下:
 
